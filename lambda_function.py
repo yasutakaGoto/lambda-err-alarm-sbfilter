@@ -24,6 +24,7 @@ def lambda_handler(event, context):
     data = zlib.decompress(b64decode(event['awslogs']['data']), 16+zlib.MAX_WBITS)
     data_json = json.loads(data)
     log_group = data_json['logGroup']
+    logger.info(data_json)
     
     #対象Function名は"cbr_*"
     func_from = log_group.find("cbr_")
@@ -38,10 +39,11 @@ def lambda_handler(event, context):
         
         #エラーメッセージの抽出
         content = data_json['logEvents'][0]['message']
-        msg_from = content.find("message:") + 10
-        msg_to = content.find("code:") -5
+        logger.info(content)
+        msg_from = content.find("ERROR:") + 7
+        msg_to = content.find("\n")
         err_msg = content[msg_from:msg_to]
-        
+
         #Log Stream URL
         log_url = LOG_URL + log_group + ";stream=" + data_json['logStream']
         
